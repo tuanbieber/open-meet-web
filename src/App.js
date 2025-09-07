@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import {
+  useSearchParams,
+} from 'react-router-dom';
 import { GoogleOAuthProvider, GoogleLogin, googleLogout } from '@react-oauth/google';
 import VideoRoom from './VideoRoom';
 import './App.css';
@@ -11,8 +14,23 @@ function App() {
   const [user, setUser] = useState(null);
   const [roomName, setRoomName] = useState('');
   const [joinInput, setJoinInput] = useState('');
+  const [joinError, setJoinError] = useState('');
   const [showRoomCreated, setShowRoomCreated] = useState(false);
   const [newlyCreatedRoom, setNewlyCreatedRoom] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const roomCode = searchParams.get('code');
+    if (roomCode) {
+      setRoomName(roomCode);
+    } else {
+      // If the user navigates back and the code is gone, clear the room
+      const currentCode = new URLSearchParams(window.location.search).get('code');
+      if (!currentCode) {
+        setRoomName('');
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const userSession = localStorage.getItem('userSession');
@@ -88,28 +106,57 @@ function App() {
   const joinRoom = () => {
     setRoomName(newlyCreatedRoom);
     setShowRoomCreated(false);
+    setSearchParams({ code: newlyCreatedRoom });
   };
 
   const copyRoomName = () => {
-    navigator.clipboard.writeText(newlyCreatedRoom);
-    // Optional: Add user feedback, e.g., an alert or a temporary message
-    alert('Room name copied to clipboard!');
+    const roomUrl = `${window.location.origin}?code=${newlyCreatedRoom}`;
+    navigator.clipboard.writeText(roomUrl);
+    alert('Room link copied to clipboard!');
   };
 
   const leaveRoom = () => {
     setRoomName('');
+    setSearchParams({});
   };
 
-  const joinEnteredRoom = () => {
-    if (joinInput.trim()) {
-      setRoomName(joinInput.trim());
+  const joinEnteredRoom = async () => {
+    const roomCode = joinInput.trim();
+    if (!roomCode) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${apiUrl}/rooms/${roomCode}`);
+      if (response.ok) {
+        // Room exists, proceed to join
+        setJoinError(''); // Clear any previous error
+        setRoomName(roomCode);
+        setSearchParams({ code: roomCode });
+      } else if (response.status === 404) {
+        // Room does not exist
+        setJoinError('Room not found. Please check the code and try again.');
+      } else {
+        // Other server error
+        setJoinError('An error occurred while trying to join the room.');
+      }
+    } catch (error) {
+      console.error('Error validating room:', error);
+      setJoinError('Could not connect to the server. Please try again later.');
+    }
+  };
+
+  const handleJoinInputKeyDown = (event) => {
+    if (event.key === 'Enter' && joinInput.trim()) {
+      event.preventDefault(); // Prevent form submission or other default "Enter" behavior
+      joinEnteredRoom();
     }
   };
 
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <div className="App">
-        <header className="App-header">
+        <header className="App-header"> 
           <div className="top-bar">
             <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer" className="logo-link">
               <div className="logo">
@@ -155,18 +202,30 @@ function App() {
                         type="text" 
                         placeholder="Enter a code or link" 
                         value={joinInput}
-                        onChange={(e) => setJoinInput(e.target.value)} 
+                        onChange={(e) => {
+                          setJoinInput(e.target.value);
+                          if (joinError) {
+                            setJoinError('');
+                          }
+                        }} 
+                        onKeyDown={handleJoinInputKeyDown}
                         className="join-input"
                       />
-                      <button 
-                        onClick={joinEnteredRoom} 
-                        className="join-button" 
+                      <button
+                        onClick={joinEnteredRoom}
+                        className="join-button"
                         disabled={!joinInput.trim()}
                       >
                         Join
                       </button>
                     </div>
                   </div>
+                  {joinError && (
+                    <div className="error-message-container">
+                      <svg aria-hidden="true" className="error-icon" fill="currentColor" focusable="false" width="16px" height="16px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path></svg>
+                      <span className="error-text">{joinError}</span>
+                    </div>
+                  )}
                   <div className="learn-more">
                     <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer">Learn more</a> about Open Meet
                   </div>

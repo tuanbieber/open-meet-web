@@ -96,7 +96,7 @@ function App() {
         setNewlyCreatedRoom(data.room.name);
         setShowRoomCreated(true);
       } else {
-        console.error('Failed t o create room: No room name in response');
+        console.error('Failed to create room: No room name in response');
       }
     } catch (error) {
       console.error('Error creating new room:', error);
@@ -112,7 +112,6 @@ function App() {
   const copyRoomName = () => {
     const roomUrl = `${window.location.origin}?code=${newlyCreatedRoom}`;
     navigator.clipboard.writeText(roomUrl);
-    alert('Room link copied to clipboard!');
   };
 
   const leaveRoom = () => {

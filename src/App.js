@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { GoogleOAuthProvider, GoogleLogin, googleLogout } from '@react-oauth/google';
+import VideoRoom from './VideoRoom';
 import './App.css';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
 function App() {
   const [user, setUser] = useState(null);
+  const [inRoom, setInRoom] = useState(false);
 
   useEffect(() => {
     const userSession = localStorage.getItem('userSession');
@@ -13,11 +15,9 @@ function App() {
       const { user, expiry } = JSON.parse(userSession);
 
       if (new Date().getTime() > expiry) {
-        // If the session has expired, remove it
         localStorage.removeItem('userSession');
         setUser(null);
       } else {
-        // Otherwise, the user is still logged in
         setUser(user);
       }
     }
@@ -34,10 +34,9 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         console.log('Server response:', data);
-        // Create a session object with a 5-minute expiry
         const session = {
           user: data,
-          expiry: new Date().getTime() + 5 * 60 * 1000, // 5 minutes from now
+          expiry: new Date().getTime() + 5 * 60 * 1000,
         };
         localStorage.setItem('userSession', JSON.stringify(session));
         setUser(data);
@@ -49,9 +48,17 @@ function App() {
 
   const handleLogout = () => {
     googleLogout();
-    // Remove the session from localStorage
     localStorage.removeItem('userSession');
     setUser(null);
+    setInRoom(false);
+  };
+
+  const joinRoom = () => {
+    setInRoom(true);
+  };
+
+  const leaveRoom = () => {
+    setInRoom(false);
   };
 
   return (
@@ -60,12 +67,17 @@ function App() {
         <header className="App-header">
           <h1>Open Meet</h1>
           {user ? (
-            <div>
-              <img src={user.picture} alt={user.name} style={{ borderRadius: '50%' }} />
-              <h3>Welcome, {user.name}</h3>
-              <p>{user.email}</p>
-              <button onClick={handleLogout}>Logout</button>
-            </div>
+            inRoom ? (
+              <VideoRoom user={user} onLeave={leaveRoom} />
+            ) : (
+              <div>
+                <img src={user.picture} alt={user.name} style={{ borderRadius: '50%' }} />
+                <h3>Welcome, {user.name}</h3>
+                <p>{user.email}</p>
+                <button onClick={joinRoom}>Join Video Room</button>
+                <button onClick={handleLogout}>Logout</button>
+              </div>
+            )
           ) : (
             <GoogleLogin
               onSuccess={responseGoogle}

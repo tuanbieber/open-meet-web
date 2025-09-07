@@ -1,52 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Room, RoomEvent } from 'livekit-client';
+import React, { useState, useEffect } from 'react';
+import {
+  LiveKitRoom,
+  VideoConference,
+  formatChatMessageLinks,
+} from '@livekit/components-react';
+import '@livekit/components-styles';
 
 const VideoRoom = ({ user, roomName, onLeave }) => {
-  const [room, setRoom] = useState(null);
-  const [participants, setParticipants] = useState([]);
-  const localVideoRef = useRef(null);
-  const remoteVideosContainerRef = useRef(null);
+  const [token, setToken] = useState('');
 
   useEffect(() => {
-    const connectToRoom = async () => {
-      const newRoom = new Room({
-        adaptiveStream: true,
-        dynacast: true,
-      });
+    if (!user?.name || !roomName) return;
 
-      setRoom(newRoom);
-
-      newRoom
-        .on(RoomEvent.ParticipantConnected, (participant) => {
-          setParticipants((prev) => [...prev, participant]);
-        })
-        .on(RoomEvent.ParticipantDisconnected, (participant) => {
-          setParticipants((prev) => prev.filter((p) => p.sid !== participant.sid));
-          const videoElement = document.getElementById(participant.sid);
-          if (videoElement) {
-            videoElement.remove();
-          }
-        })
-        .on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-          if (track.kind === 'video' || track.kind === 'audio') {
-            const element = document.createElement(track.kind);
-            element.id = participant.sid;
-            element.autoplay = true;
-            track.attach(element);
-            if (remoteVideosContainerRef.current) {
-              remoteVideosContainerRef.current.appendChild(element);
-            }
-          }
-        })
-        .on(RoomEvent.LocalTrackPublished, (publication) => {
-          if (publication.track.kind === 'video') {
-            const localTrack = publication.track;
-            if (localVideoRef.current) {
-              localTrack.attach(localVideoRef.current);
-            }
-          }
-        });
-
+    const getToken = async () => {
       try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/livekit-tokens`, {
           method: 'POST',
@@ -54,48 +20,35 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
           body: JSON.stringify({ room_name: roomName, identity: user.name }),
         });
         const data = await response.json();
-        const token = data.token;
-
-        const livekitUrl = process.env.REACT_APP_LIVEKIT_URL;
-
-        await newRoom.connect(livekitUrl, token);
-        await newRoom.localParticipant.enableCameraAndMicrophone();
-        setParticipants([newRoom.localParticipant, ...newRoom.remoteParticipants.values()]);
+        setToken(data.token);
       } catch (error) {
-        console.error('Failed to connect to LiveKit room:', error);
+        console.error('Failed to get LiveKit token:', error);
       }
     };
 
-    if (roomName && user?.name) {
-      connectToRoom();
-    }
+    getToken();
+  }, [user?.name, roomName]);
 
-    return () => {
-      if (room) {
-        room.disconnect();
-      }
-    };
-  }, [roomName, user?.name]);
+  if (!token) {
+    return <div>Getting token...</div>;
+  }
 
   return (
-    <div>
-      <h2>Video Room: {roomName}</h2>
-      <button onClick={() => {
-        if (room) {
-          room.disconnect();
-        }
-        onLeave();
-      }}>Leave Room</button>
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        <div style={{ margin: '10px' }}>
-          <h4>My Video ({room?.localParticipant.identity})</h4>
-          <video ref={localVideoRef} autoPlay muted style={{ width: '320px' }} />
-        </div>
-        <div ref={remoteVideosContainerRef} style={{ display: 'flex', flexWrap: 'wrap' }}>
-          {/* Remote videos will be appended here */}
-        </div>
-      </div>
-    </div>
+    <LiveKitRoom
+      video={true}
+      audio={true}
+      token={token}
+      serverUrl={process.env.REACT_APP_LIVEKIT_URL}
+      onDisconnected={onLeave}
+      // Use the default LiveKit theme for nice styles.
+      data-lk-theme="default"
+      style={{ height: '100dvh' }}
+    >
+      <VideoConference
+        chatMessageFormatter={formatChatMessageLinks}
+        SettingsComponent={undefined}
+      />
+    </LiveKitRoom>
   );
 };
 

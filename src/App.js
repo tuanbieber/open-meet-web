@@ -8,10 +8,18 @@ function App() {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
-    // Check if user info is stored in localStorage on initial load
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const userSession = localStorage.getItem('userSession');
+    if (userSession) {
+      const { user, expiry } = JSON.parse(userSession);
+
+      if (new Date().getTime() > expiry) {
+        // If the session has expired, remove it
+        localStorage.removeItem('userSession');
+        setUser(null);
+      } else {
+        // Otherwise, the user is still logged in
+        setUser(user);
+      }
     }
   }, []);
 
@@ -26,8 +34,12 @@ function App() {
       .then((res) => res.json())
       .then((data) => {
         console.log('Server response:', data);
-        // Save user info to localStorage
-        localStorage.setItem('user', JSON.stringify(data));
+        // Create a session object with a 5-minute expiry
+        const session = {
+          user: data,
+          expiry: new Date().getTime() + 5 * 60 * 1000, // 5 minutes from now
+        };
+        localStorage.setItem('userSession', JSON.stringify(session));
         setUser(data);
       })
       .catch((error) => {
@@ -37,8 +49,8 @@ function App() {
 
   const handleLogout = () => {
     googleLogout();
-    // Remove user info from localStorage
-    localStorage.removeItem('user');
+    // Remove the session from localStorage
+    localStorage.removeItem('userSession');
     setUser(null);
   };
 

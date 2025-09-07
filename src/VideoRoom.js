@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Room, RoomEvent } from 'livekit-client';
 
-const VideoRoom = ({ user, onLeave }) => {
+const VideoRoom = ({ user, roomName, onLeave }) => {
   const [room, setRoom] = useState(null);
   const [participants, setParticipants] = useState([]);
   const localVideoRef = useRef(null);
@@ -33,7 +33,9 @@ const VideoRoom = ({ user, onLeave }) => {
             element.id = participant.sid;
             element.autoplay = true;
             track.attach(element);
-            remoteVideosContainerRef.current.appendChild(element);
+            if (remoteVideosContainerRef.current) {
+              remoteVideosContainerRef.current.appendChild(element);
+            }
           }
         })
         .on(RoomEvent.LocalTrackPublished, (publication) => {
@@ -46,10 +48,10 @@ const VideoRoom = ({ user, onLeave }) => {
         });
 
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/get-livekit-token`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/livekit-tokens`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ room_name: 'my-first-room', identity: user.name }),
+          body: JSON.stringify({ room_name: roomName, identity: user.name }),
         });
         const data = await response.json();
         const token = data.token;
@@ -64,18 +66,20 @@ const VideoRoom = ({ user, onLeave }) => {
       }
     };
 
-    connectToRoom();
+    if (roomName && user?.name) {
+      connectToRoom();
+    }
 
     return () => {
       if (room) {
         room.disconnect();
       }
     };
-  }, []);
+  }, [roomName, user?.name]);
 
   return (
     <div>
-      <h2>Video Room</h2>
+      <h2>Video Room: {roomName}</h2>
       <button onClick={() => {
         if (room) {
           room.disconnect();

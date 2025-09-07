@@ -3,6 +3,7 @@ import { GoogleOAuthProvider, GoogleLogin, googleLogout } from '@react-oauth/goo
 import VideoRoom from './VideoRoom';
 import './App.css';
 import logo from './assets/logo.png';
+import meeting from './assets/meeting.png';
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -110,10 +111,12 @@ function App() {
       <div className="App">
         <header className="App-header">
           <div className="top-bar">
-            <div className="logo">
-              <img src={logo} alt="Open Meet" />
-              <span>Open Meet</span>
-            </div>
+            <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer" className="logo-link">
+              <div className="logo">
+                <img src={logo} alt="Open Meet" />
+                <span>Open Meet</span>
+              </div>
+            </a>
             {user && (
               <div className="user-info">
                 <img src={user.picture} alt={user.name} className="user-avatar" />
@@ -165,11 +168,13 @@ function App() {
                     </div>
                   </div>
                   <div className="learn-more">
-                    <a href="#">Learn more</a> about Open Meet
+                    <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer">Learn more</a> about Open Meet
                   </div>
                 </div>
                 <div className="home-right">
-                  <img src="https://www.gstatic.com/meet/user_edu_get_a_link_light_90698cd7b4ca04d3005c962a3756c42d.svg" alt="Get a link" />
+                  <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer">
+                    <img src={meeting} alt="Get a link" />
+                  </a>
                 </div>
               </div>
             )
@@ -188,11 +193,13 @@ function App() {
                     />
                 </div>
                   <div className="learn-more">
-                    <a href="#">Learn more</a> about Open Meet
+                    <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer">Learn more</a> about Open Meet
                   </div>
                 </div>
                 <div className="home-right">
-                  <img src="https://www.gstatic.com/meet/user_edu_get_a_link_light_90698cd7b4ca04d3005c962a3756c42d.svg" alt="Get a link" />
+                  <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer">
+                    <img src={meeting} alt="Get a link" />
+                  </a>
                 </div>
               </div>
           )}

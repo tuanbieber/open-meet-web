@@ -39,6 +39,10 @@ body {
   margin-right: 8px;
 }
 
+.logo-link {
+  text-decoration: none;
+}
+
 .logo span {
   font-size: 22px;
   color: #5f6368;

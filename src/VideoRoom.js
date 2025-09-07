@@ -42,7 +42,7 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
       onDisconnected={onLeave}
       // Use the default LiveKit theme for nice styles.
       data-lk-theme="default"
-      style={{ height: '100dvh' }}
+      style={{ height: '100%' }}
     >
       <VideoConference
         chatMessageFormatter={formatChatMessageLinks}

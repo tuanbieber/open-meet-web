@@ -220,3 +220,52 @@ body {
 .error-icon {
   margin-right: 8px;
 }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .home-container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .home-right {
+    display: none; /* Hide image on small screens */
+  }
+
+  .home-left {
+    max-width: 100%;
+    padding: 0 16px;
+  }
+
+  .home-left h1 {
+    font-size: 32px;
+    line-height: 40px;
+  }
+
+  .home-actions {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .join-input {
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding doesn't add to width */
+  }
+
+  .main-content {
+    padding: 16px;
+  }
+
+  .top-bar {
+    padding: 0 16px;
+  }
+
+  .logo span {
+    font-size: 18px;
+  }
+
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+}

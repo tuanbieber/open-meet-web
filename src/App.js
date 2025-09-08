@@ -126,7 +126,17 @@ function App() {
     }
 
     try {
-      const response = await fetch(`${apiUrl}/rooms/${roomCode}`);
+      const headers = {
+        'Content-Type': 'application/json',
+      };
+      if (user && user.token) {
+        headers['Authorization'] = `Bearer ${user.token}`;
+      }
+
+      const response = await fetch(`${apiUrl}/rooms/${roomCode}`, {
+        headers: headers,
+      });
+
       if (response.ok) {
         // Room exists, proceed to join
         setJoinError(''); // Clear any previous error

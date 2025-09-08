@@ -19,6 +19,7 @@ import './VideoRoom.css';
 // Helper function to get participant info including avatar
 const getParticipantInfo = (participants, participantIdentity) => {
   const participant = participants.find(p => p.identity === participantIdentity);
+  
   if (participant && participant.metadata) {
     try {
       const metadata = JSON.parse(participant.metadata);
@@ -188,8 +189,9 @@ const CustomChat = ({ user }) => {
 };
 
 // Custom component for participant list
-const ParticipantList = () => {
+const ParticipantList = ({ user }) => {
   const participants = useParticipants();
+  const room = useRoomContext();
 
   return (
     <div className="participant-list-container">
@@ -198,19 +200,25 @@ const ParticipantList = () => {
       </h3>
       <div className="participant-list">
         {participants.map((participant) => {
+          const isLocalParticipant = participant.identity === room?.localParticipant?.identity;
           const participantInfo = getParticipantInfo(participants, participant.identity);
+          
+          // Use user's Google avatar for local participant
+          const avatar = isLocalParticipant && user?.picture ? user.picture : participantInfo.avatar;
+          const name = isLocalParticipant && user?.name ? user.name : participantInfo.name;
+          
           return (
             <div key={participant.sid} className="participant-item">
               <div className="participant-avatar">
                 <img 
-                  src={participantInfo.avatar}
-                  alt={participantInfo.name}
+                  src={avatar}
+                  alt={name}
                   className="participant-avatar-img"
                 />
               </div>
               <div className="participant-info">
                 <div className="participant-name">
-                  {participantInfo.name}
+                  {name}
                 </div>
                 <div className="participant-status">
                   <span className={`status-indicator ${participant.isCameraEnabled ? 'camera-on' : 'camera-off'}`}>
@@ -250,7 +258,7 @@ const CustomMeetingLayout = ({ user }) => {
         <ControlBar variation="minimal" />
       </div>
       <div className="sidebar-right">
-        <ParticipantList />
+        <ParticipantList user={user} />
         <CustomChat user={user} />
       </div>
       <RoomAudioRenderer />

@@ -16,7 +16,10 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
       try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/livekit-tokens`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${user.token}`,
+          },
           body: JSON.stringify({ room_name: roomName, identity: user.name }),
         });
         const data = await response.json();

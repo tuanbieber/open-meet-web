@@ -79,7 +79,7 @@ function App() {
 
   const createNewRoom = async () => {
     if (!user || !user.token) {
-      console.error('Cannot create room: User is not logged in or token is missing.');
+      setJoinError('You must be logged in to create a room.');
       return;
     }
 
@@ -91,15 +91,23 @@ function App() {
           'Authorization': `Bearer ${user.token}`,
         },
       });
-      const data = await response.json();
-      if (data.room && data.room.name) {
-        setNewlyCreatedRoom(data.room.name);
-        setShowRoomCreated(true);
+
+      if (response.status === 201) {
+        const data = await response.json();
+        if (data.room && data.room.name) {
+          setNewlyCreatedRoom(data.room.name);
+          setShowRoomCreated(true);
+          setJoinError(''); // Clear previous errors
+        } else {
+          setJoinError('Failed to create room. Please try again.');
+        }
       } else {
-        console.error('Failed to create room: No room name in response');
+        // Handle non-201 responses
+        const errorData = await response.json().catch(() => ({ message: 'An unknown error occurred.' }));
+        setJoinError(errorData.message || 'Could not create room. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating new room:', error);
+      setJoinError('Could not connect to the server. Please try again later.');
     }
   };
 
@@ -150,7 +158,6 @@ function App() {
         setJoinError('An error occurred while trying to join the room.');
       }
     } catch (error) {
-      console.error('Error validating room:', error);
       setJoinError('Could not connect to the server. Please try again later.');
     }
   };

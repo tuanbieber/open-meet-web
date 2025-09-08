@@ -5,12 +5,13 @@ import {
   formatChatMessageLinks,
 } from '@livekit/components-react';
 import '@livekit/components-styles';
+import './VideoRoom.css';
 
 const VideoRoom = ({ user, roomName, onLeave }) => {
   const [token, setToken] = useState('');
 
   useEffect(() => {
-    if (!user?.name || !roomName) return;
+    if (!roomName) return;
 
     const getToken = async () => {
       try {
@@ -20,7 +21,7 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${user.token}`,
           },
-          body: JSON.stringify({ room_name: roomName, identity: user.name }),
+          body: JSON.stringify({ room_name: roomName }),
         });
         const data = await response.json();
         setToken(data.token);
@@ -30,10 +31,10 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
     };
 
     getToken();
-  }, [user?.name, roomName]);
+  }, [roomName, user]);
 
   if (!token) {
-    return <div>Getting token...</div>;
+    return <div>Please wait, we're getting your video room ready...</div>;
   }
 
   return (

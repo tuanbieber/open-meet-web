@@ -1,0 +1,79 @@
+.video-room-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.main-stage {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.main-stage .lk-grid-layout {
+  flex-grow: 1;
+}
+
+.sidebar {
+  width: 280px;
+  background-color: #191919; /* Dark background for the sidebar */
+  padding: 16px;
+  box-sizing: border-box;
+  color: #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.sidebar h3 {
+  margin-top: 0;
+  border-bottom: 1px solid #333;
+  padding-bottom: 12px;
+}
+
+.participant-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.participant-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.participant-list li.host {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.host-label {
+  font-size: 0.8em;
+  color: #666;
+}
+
+.participant-name-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 4px 8px;
+  border-top-right-radius: 4px;
+  font-size: 0.9em;
+}
+
+.user-display-overlay {
+  position: absolute;
+  bottom: 80px; /* Adjust to be above the control bar */
+  left: 20px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 0.9em;
+  z-index: 10; /* Ensure it's on top */
+}

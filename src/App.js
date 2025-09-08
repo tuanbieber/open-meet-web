@@ -165,7 +165,7 @@ function App() {
             </a>
             {user && (
               <div className="user-info">
-                <img src={user.picture} alt={user.name} className="user-avatar" />
+                <img src={user.picture} alt={user.email} className="user-avatar" />
                 <button onClick={handleLogout} className="logout-button">Logout</button>
               </div>
             )}

@@ -56,7 +56,6 @@ function App() {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log('Server response:', data);
         const session = {
           user: data,
           expiry: new Date().getTime() + 5 * 60 * 1000,
@@ -120,6 +119,7 @@ function App() {
   const copyRoomName = () => {
     const roomUrl = `${window.location.origin}?code=${newlyCreatedRoom}`;
     navigator.clipboard.writeText(roomUrl);
+    setShowRoomCreated(false);
   };
 
   const leaveRoom = () => {
@@ -152,7 +152,7 @@ function App() {
         setSearchParams({ code: roomCode });
       } else if (response.status === 404) {
         // Room does not exist
-        setJoinError('Room not found. Please check the code and try again.');
+        setJoinError('Room not found. The room may have been deleted or the code is incorrect.');
       } else {
         // Other server error
         setJoinError('An error occurred while trying to join the room.');

@@ -66,14 +66,63 @@
   font-size: 0.9em;
 }
 
-.user-display-overlay {
-  position: absolute;
-  bottom: 80px; /* Adjust to be above the control bar */
-  left: 20px;
-  background-color: rgba(0, 0, 0, 0.6);
+.error-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.error-popup {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+  max-height: 300px;
+}
+
+.error-popup-content {
+  padding: 24px;
+  text-align: center;
+}
+
+.error-popup-content h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+.error-popup-content p {
+  margin: 0 0 24px 0;
+  color: #666;
+  line-height: 1.5;
+}
+
+.error-popup-button {
+  background-color: #1a73e8;
   color: white;
-  padding: 5px 10px;
-  border-radius: 5px;
-  font-size: 0.9em;
-  z-index: 10; /* Ensure it's on top */
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.error-popup-button:hover {
+  background-color: #1557b0;
+}
+
+.error-popup-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }

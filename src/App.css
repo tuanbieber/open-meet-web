@@ -53,18 +53,97 @@ body {
   align-items: center;
 }
 
+.user-avatar-container {
+  position: relative;
+  margin-right: 16px;
+}
+
 .user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 16px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.user-avatar:hover {
+  opacity: 0.8;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  z-index: 1000;
+  border: 1px solid #dadce0;
+}
+
+.user-dropdown-content {
+  padding: 16px;
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.user-dropdown-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+
+.user-dropdown-info {
+  flex: 1;
+}
+
+.user-dropdown-name {
+  font-weight: 500;
+  font-size: 16px;
+  color: #202124;
+  margin-bottom: 4px;
+}
+
+.user-dropdown-email {
+  font-size: 14px;
+  color: #5f6368;
+}
+
+.user-dropdown-divider {
+  border: none;
+  border-top: 1px solid #dadce0;
+  margin: 16px -16px;
+}
+
+.user-dropdown-logout {
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 12px 0;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14px;
+  color: #5f6368;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.user-dropdown-logout:hover {
+  background-color: #f8f9fa;
+  color: #202124;
 }
 
 .logout-button {
   background-color: transparent;
   border: 1px solid #dadce0;
   border-radius: 4px;
-  color: #1a73e8;
+  color: #f59e0b;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
@@ -125,12 +204,12 @@ body {
 }
 
 .action-button.primary {
-  background-color: #1a73e8;
+  background-color: #f59e0b;
   color: #fff;
 }
 
 .action-button.primary:hover {
-  background-color: #287ae6;
+  background-color: #fbbf24;
 }
 
 .new-meeting svg {
@@ -154,7 +233,7 @@ body {
 .join-button {
   background-color: transparent;
   border: none;
-  color: #1a73e8;
+  color: #f59e0b;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
@@ -173,7 +252,7 @@ body {
 }
 
 .learn-more a {
-  color: #1a73e8;
+  color: #f59e0b;
   text-decoration: none;
 }
 

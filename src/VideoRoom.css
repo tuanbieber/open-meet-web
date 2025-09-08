@@ -107,7 +107,7 @@
 }
 
 .error-popup-button {
-  background-color: #1a73e8;
+  background-color: #f59e0b;
   color: white;
   border: none;
   border-radius: 6px;
@@ -119,10 +119,10 @@
 }
 
 .error-popup-button:hover {
-  background-color: #1557b0;
+  background-color: #d97706;
 }
 
 .error-popup-button:focus {
   outline: none;
-  box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }

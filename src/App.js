@@ -17,6 +17,7 @@ function App() {
   const [joinError, setJoinError] = useState('');
   const [showRoomCreated, setShowRoomCreated] = useState(false);
   const [newlyCreatedRoom, setNewlyCreatedRoom] = useState('');
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -46,6 +47,19 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showUserDropdown && !event.target.closest('.user-avatar-container')) {
+        setShowUserDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserDropdown]);
+
   const responseGoogle = (codeResponse) => {
     fetch(`${apiUrl}/callback`, {
       method: 'POST',
@@ -74,6 +88,11 @@ function App() {
     setUser(null);
     setRoomName('');
     setShowRoomCreated(false);
+    setShowUserDropdown(false);
+  };
+
+  const toggleUserDropdown = () => {
+    setShowUserDropdown(!showUserDropdown);
   };
 
   const createNewRoom = async () => {
@@ -182,7 +201,31 @@ function App() {
             </a>
             {user && (
               <div className="user-info">
-                <img src={user.picture} alt={user.email} className="user-avatar" />
+                <div className="user-avatar-container">
+                  <img 
+                    src={user.picture} 
+                    alt={user.email} 
+                    className="user-avatar" 
+                    onClick={toggleUserDropdown}
+                  />
+                  {showUserDropdown && (
+                    <div className="user-dropdown">
+                      <div className="user-dropdown-content">
+                        <div className="user-dropdown-header">
+                          <img src={user.picture} alt={user.email} className="user-dropdown-avatar" />
+                          <div className="user-dropdown-info">
+                            <div className="user-dropdown-name">{user.name}</div>
+                            <div className="user-dropdown-email">{user.email}</div>
+                          </div>
+                        </div>
+                        <hr className="user-dropdown-divider" />
+                        <button onClick={handleLogout} className="user-dropdown-logout">
+                          Logout
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
                 <button onClick={handleLogout} className="logout-button">Logout</button>
               </div>
             )}

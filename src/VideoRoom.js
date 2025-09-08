@@ -16,8 +16,31 @@ import { Track, DataPacket_Kind } from 'livekit-client';
 import '@livekit/components-styles';
 import './VideoRoom.css';
 
+// Helper function to get participant info including avatar
+const getParticipantInfo = (participants, participantIdentity) => {
+  const participant = participants.find(p => p.identity === participantIdentity);
+  if (participant && participant.metadata) {
+    try {
+      const metadata = JSON.parse(participant.metadata);
+      return {
+        name: metadata.name || participantIdentity,
+        avatar: metadata.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(participantIdentity)}&background=f59e0b&color=fff&size=32`
+      };
+    } catch (e) {
+      return {
+        name: participantIdentity,
+        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(participantIdentity)}&background=f59e0b&color=fff&size=32`
+      };
+    }
+  }
+  return {
+    name: participantIdentity,
+    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(participantIdentity)}&background=f59e0b&color=fff&size=32`
+  };
+};
+
 // Custom Chat Component
-const CustomChat = () => {
+const CustomChat = ({ user }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = React.useRef(null);
@@ -49,10 +72,13 @@ const CustomChat = () => {
       try {
         const message = JSON.parse(new TextDecoder().decode(payload));
         if (message.type === 'chat') {
+          const participantInfo = getParticipantInfo(participants, participant?.identity || 'Unknown');
           setMessages(prev => [...prev, {
             id: Date.now(),
             text: message.text,
-            sender: participant?.identity || 'Unknown',
+            sender: participantInfo.name,
+            senderIdentity: participant?.identity || 'Unknown',
+            avatar: participantInfo.avatar,
             timestamp: new Date(),
             isLocal: participant?.isLocal || false
           }]);
@@ -81,10 +107,13 @@ const CustomChat = () => {
     );
 
     // Add to local messages
+    const localParticipantInfo = getParticipantInfo(participants, room.localParticipant.identity);
     setMessages(prev => [...prev, {
       id: Date.now(),
       text: newMessage.trim(),
-      sender: room.localParticipant.identity,
+      sender: localParticipantInfo.name,
+      senderIdentity: room.localParticipant.identity,
+      avatar: user?.picture || localParticipantInfo.avatar, // Use actual user avatar if available
       timestamp: new Date(),
       isLocal: true
     }]);
@@ -115,13 +144,22 @@ const CustomChat = () => {
           <>
             {messages.map((message) => (
               <div key={message.id} className={`chat-message ${message.isLocal ? 'local' : 'remote'}`}>
-                <div className="message-header">
-                  <span className="message-sender">{message.sender}</span>
-                  <span className="message-time">
-                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                <div className="message-avatar">
+                  <img 
+                    src={message.avatar}
+                    alt={message.sender}
+                    className="message-avatar-img"
+                  />
                 </div>
-                <div className="message-content">{message.text}</div>
+                <div className="message-body">
+                  <div className="message-header">
+                    <span className="message-sender">{message.sender}</span>
+                    <span className="message-time">
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="message-content">{message.text}</div>
+                </div>
               </div>
             ))}
             <div ref={messagesEndRef} />
@@ -159,38 +197,41 @@ const ParticipantList = () => {
         Participants ({participants.length})
       </h3>
       <div className="participant-list">
-        {participants.map((participant) => (
-          <div key={participant.sid} className="participant-item">
-            <div className="participant-avatar">
-              <img 
-                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(participant.identity)}&background=f59e0b&color=fff&size=32`}
-                alt={participant.identity}
-                className="participant-avatar-img"
-              />
-            </div>
-            <div className="participant-info">
-              <div className="participant-name">
-                {participant.identity}
+        {participants.map((participant) => {
+          const participantInfo = getParticipantInfo(participants, participant.identity);
+          return (
+            <div key={participant.sid} className="participant-item">
+              <div className="participant-avatar">
+                <img 
+                  src={participantInfo.avatar}
+                  alt={participantInfo.name}
+                  className="participant-avatar-img"
+                />
               </div>
-              <div className="participant-status">
-                <span className={`status-indicator ${participant.isCameraEnabled ? 'camera-on' : 'camera-off'}`}>
-                  📹
-                </span>
-                <span className={`status-indicator ${participant.isMicrophoneEnabled ? 'mic-on' : 'mic-off'}`}>
-                  🎤
-                </span>
-                {participant.isLocal && <span className="you-label">(You)</span>}
+              <div className="participant-info">
+                <div className="participant-name">
+                  {participantInfo.name}
+                </div>
+                <div className="participant-status">
+                  <span className={`status-indicator ${participant.isCameraEnabled ? 'camera-on' : 'camera-off'}`}>
+                    📹
+                  </span>
+                  <span className={`status-indicator ${participant.isMicrophoneEnabled ? 'mic-on' : 'mic-off'}`}>
+                    🎤
+                  </span>
+                  {participant.isLocal && <span className="you-label">(You)</span>}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
 };
 
 // Custom meeting layout component
-const CustomMeetingLayout = () => {
+const CustomMeetingLayout = ({ user }) => {
   const participants = useParticipants();
   const tracks = useTracks(
     [
@@ -210,7 +251,7 @@ const CustomMeetingLayout = () => {
       </div>
       <div className="sidebar-right">
         <ParticipantList />
-        <CustomChat />
+        <CustomChat user={user} />
       </div>
       <RoomAudioRenderer />
     </div>
@@ -298,7 +339,7 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
       data-lk-theme="default"
       style={{ height: '100%' }}
     >
-      <CustomMeetingLayout />
+      <CustomMeetingLayout user={user} />
     </LiveKitRoom>
   );
 };

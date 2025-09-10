@@ -195,6 +195,113 @@ body {
   height: 40px;
 }
 
+/* Enhanced styles for LiveKit TrackToggle buttons */
+.lk-control-bar .lk-button {
+  background-color: var(--lk-control-bg) !important;
+  color: var(--lk-control-fg) !important;
+  border: 2px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: var(--lk-border-radius) !important;
+  padding: 8px 12px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  font-size: 16px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Enabled state (active) - using theme colors with enhanced visibility */
+.lk-control-bar .lk-button[data-lk-enabled="true"],
+.lk-control-bar .lk-button.lk-button-active {
+  background-color: var(--lk-control-active-bg) !important;
+  color: var(--lk-control-active-fg) !important;
+  border-color: var(--lk-control-active-bg) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transform: scale(1.05) !important;
+  opacity: 1 !important;
+}
+
+/* Disabled state - using theme colors with reduced opacity */
+.lk-control-bar .lk-button[data-lk-enabled="false"]:not(.lk-button-active) {
+  background-color: var(--lk-control-bg) !important;
+  color: var(--lk-control-fg) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  opacity: 0.6 !important;
+  filter: grayscale(50%) !important;
+}
+
+/* Neutral/inactive state for buttons without data-lk-enabled */
+.lk-control-bar .lk-button:not([data-lk-enabled]):not(.lk-button-active) {
+  background-color: var(--lk-control-bg) !important;
+  color: var(--lk-control-fg) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  opacity: 0.8 !important;
+}
+
+/* Hover effects */
+.lk-control-bar .lk-button:hover[data-lk-enabled="true"],
+.lk-control-bar .lk-button:hover.lk-button-active {
+  background-color: var(--lk-control-hover-bg) !important;
+  transform: scale(1.1) translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+  opacity: 1 !important;
+}
+
+.lk-control-bar .lk-button:hover[data-lk-enabled="false"]:not(.lk-button-active) {
+  background-color: var(--lk-control-hover-bg) !important;
+  color: var(--lk-control-fg) !important;
+  transform: scale(1.05) translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  opacity: 0.8 !important;
+  filter: grayscale(30%) !important;
+}
+
+.lk-control-bar .lk-button:hover:not([data-lk-enabled]):not(.lk-button-active) {
+  background-color: var(--lk-control-hover-bg) !important;
+  color: var(--lk-control-fg) !important;
+  transform: scale(1.05) translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  opacity: 1 !important;
+}
+
+/* Screen share button special styling - keeping theme consistency */
+.lk-control-bar .lk-button[aria-label*="screen" i],
+.lk-control-bar .lk-button[title*="screen" i] {
+  background-color: var(--lk-control-bg) !important;
+  color: var(--lk-control-fg) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.lk-control-bar .lk-button[aria-label*="screen" i].lk-button-active,
+.lk-control-bar .lk-button[title*="screen" i].lk-button-active {
+  background-color: var(--lk-control-active-bg) !important;
+  color: var(--lk-control-active-fg) !important;
+  border-color: var(--lk-control-active-bg) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  transform: scale(1.05) !important;
+}
+
+.lk-control-bar .lk-button[aria-label*="screen" i]:hover.lk-button-active,
+.lk-control-bar .lk-button[title*="screen" i]:hover.lk-button-active {
+  background-color: var(--lk-control-hover-bg) !important;
+  transform: scale(1.1) translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.lk-control-bar .lk-button[aria-label*="screen" i]:hover:not(.lk-button-active),
+.lk-control-bar .lk-button[title*="screen" i]:hover:not(.lk-button-active) {
+  background-color: var(--lk-control-hover-bg) !important;
+  color: var(--lk-control-fg) !important;
+  transform: scale(1.05) translateY(-1px) !important;
+}
+
 /* Chat toggle button integrated in control bar */
 .chat-toggle-btn {
   background-color: var(--lk-control-bg) !important;

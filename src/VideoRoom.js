@@ -243,6 +243,8 @@ const ParticipantList = ({ user }) => {
 // Custom meeting layout component
 const CustomMeetingLayout = ({ user }) => {
   const [isChatVisible, setIsChatVisible] = useState(true);
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [isResizing, setIsResizing] = useState(false);
   const participants = useParticipants();
   const room = useRoomContext();
   const tracks = useTracks(
@@ -256,6 +258,51 @@ const CustomMeetingLayout = ({ user }) => {
   const toggleChat = () => {
     setIsChatVisible(!isChatVisible);
   };
+
+  const handleMouseDown = (e) => {
+    setIsResizing(true);
+    e.preventDefault();
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isResizing) return;
+    
+    const containerWidth = window.innerWidth;
+    const newWidth = containerWidth - e.clientX;
+    
+    // Set minimum and maximum widths
+    const minWidth = 250;
+    const maxWidth = containerWidth * 0.6; // Max 60% of screen width
+    
+    if (newWidth >= minWidth && newWidth <= maxWidth) {
+      setSidebarWidth(newWidth);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsResizing(false);
+  };
+
+  React.useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [isResizing]);
 
   return (
     <div className="custom-meeting-layout">
@@ -291,10 +338,19 @@ const CustomMeetingLayout = ({ user }) => {
         </div>
       </div>
       {isChatVisible && (
-        <div className="sidebar-right">
-          <ParticipantList user={user} />
-          <CustomChat user={user} />
-        </div>
+        <>
+          <div 
+            className="resize-handle"
+            onMouseDown={handleMouseDown}
+          />
+          <div 
+            className="sidebar-right"
+            style={{ width: sidebarWidth }}
+          >
+            <ParticipantList user={user} />
+            <CustomChat user={user} />
+          </div>
+        </>
       )}
       <RoomAudioRenderer />
     </div>

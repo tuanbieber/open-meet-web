@@ -244,6 +244,7 @@ const ParticipantList = ({ user }) => {
 const CustomMeetingLayout = ({ user }) => {
   const [isChatVisible, setIsChatVisible] = useState(true);
   const participants = useParticipants();
+  const room = useRoomContext();
   const tracks = useTracks(
     [
       { source: Track.Source.Camera, withPlaceholder: true },
@@ -273,7 +274,20 @@ const CustomMeetingLayout = ({ user }) => {
           >
             💬
           </button>
-          <DisconnectButton />
+          <button 
+            onClick={() => {
+              if (room) {
+                room.disconnect();
+              }
+            }}
+            className="lk-button lk-button-menu lk-disconnect-button"
+            title="Leave Meeting"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M10 3l4 4-4 4v-3H6V6h4V3z"/>
+              <path d="M3 2h6v2H3v8h6v2H3a1 1 0 01-1-1V3a1 1 0 011-1z"/>
+            </svg>
+          </button>
         </div>
       </div>
       {isChatVisible && (

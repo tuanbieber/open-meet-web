@@ -11,6 +11,8 @@ import {
   useTracks,
   useRoomContext,
   useDataChannel,
+  TrackToggle,
+  DisconnectButton,
 } from '@livekit/components-react';
 import { Track, DataPacket_Kind } from 'livekit-client';
 import '@livekit/components-styles';
@@ -240,6 +242,7 @@ const ParticipantList = ({ user }) => {
 
 // Custom meeting layout component
 const CustomMeetingLayout = ({ user }) => {
+  const [isChatVisible, setIsChatVisible] = useState(true);
   const participants = useParticipants();
   const tracks = useTracks(
     [
@@ -249,18 +252,36 @@ const CustomMeetingLayout = ({ user }) => {
     { onlySubscribed: false },
   );
 
+  const toggleChat = () => {
+    setIsChatVisible(!isChatVisible);
+  };
+
   return (
     <div className="custom-meeting-layout">
       <div className="video-area">
         <GridLayout tracks={tracks}>
           <ParticipantTile />
         </GridLayout>
-        <ControlBar variation="minimal" />
+        <div className="lk-control-bar">
+          <TrackToggle source={Track.Source.Microphone} showIcon={true} />
+          <TrackToggle source={Track.Source.Camera} showIcon={true} />
+          <TrackToggle source={Track.Source.ScreenShare} showIcon={true} />
+          <button 
+            onClick={toggleChat}
+            className={`lk-button lk-button-menu chat-toggle-btn ${isChatVisible ? 'lk-button-active' : ''}`}
+            title={isChatVisible ? 'Hide Chat' : 'Show Chat'}
+          >
+            💬
+          </button>
+          <DisconnectButton />
+        </div>
       </div>
-      <div className="sidebar-right">
-        <ParticipantList user={user} />
-        <CustomChat user={user} />
-      </div>
+      {isChatVisible && (
+        <div className="sidebar-right">
+          <ParticipantList user={user} />
+          <CustomChat user={user} />
+        </div>
+      )}
       <RoomAudioRenderer />
     </div>
   );

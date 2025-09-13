@@ -19,6 +19,7 @@ function App() {
   const [newlyCreatedRoom, setNewlyCreatedRoom] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [roomMetadata, setRoomMetadata] = useState(null);
   // Auth error popup state
   const [showAuthError, setShowAuthError] = useState(false);
   const [authErrorMessage, setAuthErrorMessage] = useState('');
@@ -212,6 +213,36 @@ function App() {
     setAuthErrorMessage('');
   };
 
+  useEffect(() => {
+    if (roomName) {
+      // Fetch room metadata when roomName is set
+      const fetchRoomMetadata = async () => {
+        try {
+          const headers = {
+            'Content-Type': 'application/json',
+          };
+          if (user && user.token) {
+            headers['Authorization'] = `Bearer ${user.token}`;
+          }
+          const response = await fetch(`${apiUrl}/rooms/${roomName}`, {
+            headers: headers,
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setRoomMetadata(data);
+          } else {
+            setRoomMetadata(null);
+          }
+        } catch (error) {
+          setRoomMetadata(null);
+        }
+      };
+      fetchRoomMetadata();
+    } else {
+      setRoomMetadata(null);
+    }
+  }, [roomName, user]);
+
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <div className="App">
@@ -272,7 +303,12 @@ function App() {
         <main className="main-content">
           {user ? (
             roomName ? (
-              <VideoRoom user={user} roomName={roomName} onLeave={leaveRoom} />
+              <VideoRoom
+                user={user}
+                roomName={roomName}
+                roomMetadata={roomMetadata}
+                onLeave={leaveRoom}
+              />
             ) : showRoomCreated ? (
               <div className="room-created-popup">
                 <h3>Room Created!</h3>
@@ -348,6 +384,8 @@ function App() {
                         flow="auth-code"
                     />
                 </div>
+
+                
                   <div className="learn-more">
                     <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer">Learn more</a> about Open Meet
                   </div>

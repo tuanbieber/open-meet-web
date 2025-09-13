@@ -19,6 +19,9 @@ function App() {
   const [newlyCreatedRoom, setNewlyCreatedRoom] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  // Auth error popup state
+  const [showAuthError, setShowAuthError] = useState(false);
+  const [authErrorMessage, setAuthErrorMessage] = useState('');
 
   useEffect(() => {
     const roomCode = searchParams.get('code');
@@ -68,7 +71,19 @@ function App() {
       },
       body: JSON.stringify(codeResponse),
     })
-      .then((res) => res.json())
+      .then(async (res) => {
+        if (!res.ok) {
+          let serverMsg = '';
+          try {
+            const data = await res.json();
+            serverMsg = data?.message || data?.error || '';
+          } catch (e) {
+            // ignore JSON parse error
+          }
+          throw new Error(serverMsg || `Sign-in failed (${res.status})`);
+        }
+        return res.json();
+      })
       .then((data) => {
         const session = {
           user: data,
@@ -79,6 +94,10 @@ function App() {
       })
       .catch((error) => {
         console.error('Error sending token to server:', error);
+        setAuthErrorMessage(
+          'We couldn\'t complete sign-in. Please try again in a moment. If the problem persists, check your internet or contact support.'
+        );
+        setShowAuthError(true);
       });
   };
 
@@ -188,9 +207,28 @@ function App() {
     }
   };
 
+  const handleCloseAuthError = () => {
+    setShowAuthError(false);
+    setAuthErrorMessage('');
+  };
+
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
       <div className="App">
+        {/* Auth error popup */}
+        {showAuthError && (
+          <div className="error-popup-overlay">
+            <div className="error-popup">
+              <div className="error-popup-content">
+                <h3>Sign-in issue</h3>
+                <p>{authErrorMessage}</p>
+                <button onClick={handleCloseAuthError} className="error-popup-button">
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         <header className="App-header"> 
           <div className="top-bar">
             <a href="https://www.linkedin.com/company/dev-more" target="_blank" rel="noopener noreferrer" className="logo-link">

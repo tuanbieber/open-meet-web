@@ -90,7 +90,7 @@ const PersistentTrackToggle = ({ source, showIcon }) => {
         localStorage.setItem('livekit-audio-enabled', (!currentState).toString());
       }
     } catch (error) {
-      console.error('Error toggling track:', error);
+      // Handle error silently
     }
   };
 
@@ -176,7 +176,7 @@ const CustomChat = ({ user }) => {
           }]);
         }
       } catch (e) {
-        console.error('Error parsing chat message:', e);
+        // Handle parsing error silently
       }
     };
 
@@ -280,9 +280,25 @@ const CustomChat = ({ user }) => {
 };
 
 // Custom component for participant list
-const ParticipantList = ({ user }) => {
+const ParticipantList = ({ user, hostInfo }) => {
   const participants = useParticipants();
   const room = useRoomContext();
+
+  // Helper to check if participant matches host
+  const isHostParticipant = (participant) => {
+    if (!hostInfo) return false;
+    // Direct match against host metadata
+    if ([hostInfo.id, hostInfo.email, hostInfo.name].includes(participant.identity)) return true;
+    // Fallback: match local user info if available
+    if (user) {
+      if (
+        participant.identity === user.id ||
+        participant.identity === user.email ||
+        participant.identity === user.name
+      ) return true;
+    }
+    return false;
+  };
 
   return (
     <div className="participant-list-container">
@@ -293,10 +309,8 @@ const ParticipantList = ({ user }) => {
         {participants.map((participant) => {
           const isLocalParticipant = participant.identity === room?.localParticipant?.identity;
           const participantInfo = getParticipantInfo(participants, participant.identity);
-          
           const avatar = isLocalParticipant && user?.picture ? user.picture : participantInfo.avatar;
           const name = isLocalParticipant && user?.name ? user.name : participantInfo.name;
-          
           return (
             <div key={participant.sid} className="participant-item">
               <div className="participant-avatar">
@@ -309,6 +323,9 @@ const ParticipantList = ({ user }) => {
               <div className="participant-info">
                 <div className="participant-name">
                   {name}
+                  {isHostParticipant(participant) && (
+                    <span className="host-text-badge"> (Host)</span>
+                  )}
                 </div>
                 <div className="participant-status">
                   <span className={`status-indicator ${participant.isCameraEnabled ? 'camera-on' : 'camera-off'}`}>
@@ -329,7 +346,7 @@ const ParticipantList = ({ user }) => {
 };
 
 // Custom meeting layout component
-const CustomMeetingLayout = ({ user }) => {
+const CustomMeetingLayout = ({ user, roomMetadata }) => {
   const [isChatVisible, setIsChatVisible] = useState(true);
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const [isResizing, setIsResizing] = useState(false);
@@ -434,7 +451,15 @@ const CustomMeetingLayout = ({ user }) => {
             className="sidebar-right"
             style={{ width: sidebarWidth }}
           >
-            <ParticipantList user={user} />
+            {/* Host info panel */}
+            {roomMetadata && roomMetadata.host && (
+              <div className="host-info-panel">
+                <div className="host-info-title">Host</div>
+                <div className="host-info-name">{roomMetadata.host.name}</div>
+                <div className="host-info-email">{roomMetadata.host.email}</div>
+              </div>
+            )}
+            <ParticipantList user={user} hostInfo={roomMetadata && roomMetadata.host ? roomMetadata.host : null} />
             <CustomChat user={user} />
           </div>
         </>
@@ -444,7 +469,7 @@ const CustomMeetingLayout = ({ user }) => {
   );
 };
 
-const VideoRoom = ({ user, roomName, onLeave }) => {
+const VideoRoom = ({ user, roomName, roomMetadata, onLeave }) => {
   const [token, setToken] = useState('');
   const [showError, setShowError] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -497,7 +522,6 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
         const data = await response.json();
         setToken(data.token);
       } catch (error) {
-        console.error('Failed to get LiveKit token:', error);
         showErrorPopup('Could not connect to the server. Please check your internet connection and try again.');
       }
     };
@@ -536,7 +560,7 @@ const VideoRoom = ({ user, roomName, onLeave }) => {
       data-lk-theme="default"
       style={{ height: '100%' }}
     >
-      <CustomMeetingLayout user={user} />
+      <CustomMeetingLayout user={user} roomMetadata={roomMetadata} />
     </LiveKitRoom>
   );
 };
